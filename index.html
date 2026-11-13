@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Al-Mahir Pro - Platform Belajar Bahasa Arab & Arena Games</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="index.css">
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i></div>
+<canvas id="confetti"></canvas>
+<div id="toasts"></div>
+
+<!-- AUTH -->
+<div class="modal show" id="auth-modal">
+ <div class="card">
+  <div class="center" style="margin-bottom:18px">
+   <div class="logo" style="justify-content:center"><b><i class="fas fa-book-quran"></i></b></div>
+   <h3 style="font-size:26px;margin-top:10px;font-weight:800">Al-Mahir <span style="color:var(--c-main)">Pro</span></h3>
+   <p class="muted">Belajar Bahasa Arab yang seru, interaktif, dan bergamifikasi.</p>
+  </div>
+  <div class="row" style="background:rgba(0,0,0,.25);padding:5px;border-radius:16px;gap:4px">
+   <button class="btn pri" style="flex:1;border-radius:12px" id="role-student" onclick="pickRole('student')">🎒 Murid</button>
+   <button class="btn" style="flex:1;border-radius:12px;background:none;border:0" id="role-teacher" onclick="pickRole('teacher')">👩‍🏫 Guru</button>
+  </div>
+  <form onsubmit="doLogin(event)">
+   <label class="l">Nama</label>
+   <input class="f" id="auth-name" required maxlength="24" placeholder="Tulis namamu...">
+   <label class="l">PIN (opsional)</label>
+   <input class="f" id="auth-pin" type="password" maxlength="12" placeholder="••••">
+   <button class="btn pri" style="width:100%;margin-top:18px;padding:14px">Mulai Belajar 🚀</button>
+  </form>
+  <div class="row between" style="margin-top:14px"><span class="muted">Data tersimpan di perangkat ini.</span><button class="muted" style="font-weight:700" onclick="doGuest()">Masuk sebagai Tamu</button></div>
+ </div>
+</div>
+
+<div class="app">
+ <aside class="side">
+  <div class="logo" onclick="go('dashboard')"><b><i class="fas fa-book-quran"></i></b><div><h1>Al-Mahir <span style="color:var(--c-main)">Pro</span></h1><small>ARABIC · EDTECH</small></div></div>
+  <div class="me">
+   <div class="row between" style="flex-wrap:nowrap">
+    <div class="row" style="gap:10px;flex-wrap:nowrap;min-width:0"><div class="avatar" id="u-av">M</div><div style="min-width:0"><div id="u-name" style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</div><span class="muted" id="u-role">MURID</span></div></div>
+    <button onclick="logout()" title="Keluar" class="muted"><i class="fas fa-right-from-bracket"></i></button>
+   </div>
+   <div class="row between" style="margin:12px 0 6px;font-size:12px;font-weight:800"><span>Level <span id="u-lv" style="color:var(--c-main)">1</span></span><span class="muted"><span id="u-xp">0</span>/500 XP</span></div>
+   <div class="bar"><i id="u-bar" style="width:0"></i></div>
+  </div>
+  <nav class="nav" id="nav-side"></nav>
+ </aside>
+ <div class="mainc">
+  <header class="top">
+   <h2 id="title">Beranda</h2>
+   <div class="row" style="gap:8px">
+    <span class="pill hide-sm">🔥 <span id="h-streak">1</span> hari</span>
+    <span class="pill" style="color:var(--c-gold)">💎 <span id="h-xp">0</span> XP</span>
+    <button class="btn sm" id="btn-sound" onclick="toggleSound()" title="Suara">🔊</button>
+    <button class="btn sm" id="btn-theme" onclick="toggleTheme()" title="Tema">🌙</button>
+    <button class="btn sm" onclick="logout()" title="Keluar" style="display:none" id="btn-logout-m"><i class="fas fa-right-from-bracket"></i></button>
+   </div>
+  </header>
+  <main id="view"></main>
+ </div>
+</div>
+<nav class="bottom" id="nav-bottom"></nav>
+
+<!-- floating audio -->
+<div id="float" class="card" style="padding:10px 14px">
+ <button class="ic-btn" style="background:var(--c-main);color:#0b1b3a" onclick="speak(lastSpeech||'مَرْحَبًا')"><i class="fas fa-volume-high"></i></button>
+ <div><div id="float-t" class="ar" style="font-size:16px;font-weight:700;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Speech</div><div class="waves off" id="waves"><i></i><i></i><i></i><i></i></div></div>
+</div>
+
+<!-- result -->
+<div class="modal" id="res-modal"><div class="card center">
+ <div id="res-emoji" style="font-size:72px">🏆</div>
+ <h3 id="res-title" style="font-size:26px;font-weight:800;margin:6px 0">Selesai!</h3>
+ <p id="res-line" class="muted"></p>
+ <div class="row" style="justify-content:center;margin:18px 0">
+  <span class="pill" style="font-size:15px;padding:10px 18px">Skor <b id="res-score">0</b></span>
+  <span class="pill" style="font-size:15px;padding:10px 18px;color:var(--c-gold)">+<b id="res-xp">0</b> XP</span>
+ </div>
+ <p id="res-best" class="muted" style="margin-bottom:14px"></p>
+ <div class="row" style="justify-content:center"><button class="btn pri" onclick="replay()">🔁 Main Lagi</button><button class="btn" onclick="closeRes();backHub()">Hub Game</button></div>
+</div></div>
+
+<!-- gacha -->
+<div class="modal" id="gacha-modal"><div class="card center">
+ <h3 style="font-size:22px;font-weight:800;color:var(--c-gold)">🎁 Mesin Gacha Mufrodat</h3>
+ <p class="muted">Tukar 50 XP dengan kartu koleksi. Kumpulkan semuanya!</p>
+ <div class="gacha-card common" id="gc"><span id="gc-r" style="font-size:10px;font-weight:800;letter-spacing:.2em">?</span><div><div class="ar" id="gc-a" style="font-size:40px;font-weight:700">؟</div><div id="gc-m" style="font-weight:700;color:#fde68a">Putar dulu!</div></div><span style="font-size:10px;opacity:.6">Al-Mahir Cards</span></div>
+ <div class="row" style="justify-content:center;margin-bottom:14px"><button class="btn" onclick="closeM('gacha-modal')">Tutup</button><button class="btn gold" onclick="rollGacha()">Putar (-50 XP)</button></div>
+ <div class="row between" style="margin-bottom:8px"><b style="font-size:13px">Koleksimu</b><span class="muted" id="coll-count"></span></div>
+ <div class="coll" id="coll"></div>
+</div></div>
+
+<!-- flashcards -->
+<div class="modal" id="fc-modal"><div class="card center">
+ <div class="row between"><b>🃏 Mode Kartu Kilat</b><span class="muted" id="fc-n"></span></div>
+ <div class="flash" id="fc" onclick="this.classList.toggle('flip')"><div><span class="f"><span style="font-size:42px" id="fc-e"></span><span class="ar" id="fc-a"></span></span><span class="b" id="fc-m"></span></div></div>
+ <p class="muted">Ketuk kartu untuk membalik</p>
+ <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" onclick="fcMove(-1)"><i class="fas fa-chevron-left"></i></button><button class="btn vio" onclick="speak(fcDeck[fcI].a)"><i class="fas fa-volume-high"></i></button><button class="btn" onclick="fcMove(1)"><i class="fas fa-chevron-right"></i></button><button class="btn" onclick="closeM('fc-modal')">Tutup</button></div>
+</div></div>
+
+<!-- add word -->
+<div class="modal" id="add-modal"><div class="card">
+ <h3 style="font-weight:800;margin-bottom:6px">Tambah Mufrodat</h3>
+ <label class="l">Kata Arab</label><input class="f ar" id="aw-a" dir="rtl" style="font-size:24px">
+ <label class="l">Arti</label><input class="f" id="aw-m">
+ <div class="grid g2"><div><label class="l">Kategori</label><input class="f" id="aw-c" value="Umum"></div><div><label class="l">Emoji</label><input class="f" id="aw-e" value="🔤" maxlength="4"></div></div>
+ <div class="row" style="justify-content:flex-end;margin-top:18px"><button class="btn" onclick="closeM('add-modal')">Batal</button><button class="btn pri" onclick="saveWord()">Simpan</button></div>
+</div></div>
+
+<script src="index1.js"></script>
+<script src="index.js"></script>
+</body>
+</html>
